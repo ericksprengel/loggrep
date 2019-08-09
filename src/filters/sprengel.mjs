@@ -1,5 +1,4 @@
 const filters = [
-  { level: /.*/ },
   { tag: /^SPRENGEL$/ },
   { message: /SPRENGEL/ },
 ]

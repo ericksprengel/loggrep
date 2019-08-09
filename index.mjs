@@ -34,6 +34,7 @@ let LAST_TAG = null
 let LAST_TAG_COLOR_INDEX = 0
 const TAG_COLORS = {
   'AlarmManager': 'red',
+  'ReactNativeJS': 'white.bgBlackBright',
 }
 
 const loadFilters = (filterPaths) => 
@@ -44,6 +45,9 @@ const loadFilters = (filterPaths) =>
 const shouldShowIt = (filterModules, line, level, tag, pid, message) => {
   for (const filterModule of filterModules) {
     for (const filter of filterModule.filters) {
+      if (filter instanceof Function) {
+        return filter(line, level, tag, pid, message)
+      }
       if ((!filter.line || filter.line.test(line))
         && (!filter.level || filter.level.test(level))
         && (!filter.tag || filter.tag.test(tag))
@@ -59,7 +63,10 @@ const shouldShowIt = (filterModules, line, level, tag, pid, message) => {
 const main = async () => {
   let FILTER_MODULES
   try {
-    FILTER_MODULES = await loadFilters(['sprengel'])
+    FILTER_MODULES = await loadFilters([
+      'pidcat',
+      'sprengel',
+    ])
   } catch (error) {
     log('Failed to load filters')
     log(`error message (${error.name}): ${error.message}`)
