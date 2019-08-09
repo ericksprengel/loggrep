@@ -2,7 +2,7 @@ import { spawn } from 'child_process'
 import readline from 'readline'
 
 // I/TAG   ( 1234): message: fruit=banana?
-const LOG_LINE  = /^([A-Z])\/(\S+)\s*\( *(\d+)\): (.*)$/
+const LOG_LINE  = /^([A-Z])\/\s*(\S*)\s*\( *(\d+)\): (.*)$/
 
 // input
 const start = (callback) => {
