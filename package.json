@@ -11,5 +11,8 @@
   },
   "bin": {
     "loggrep": "index.mjs"
+  },
+  "dependencies": {
+    "chalk": "^2.4.2"
   }
 }

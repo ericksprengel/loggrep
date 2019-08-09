@@ -1,13 +1,12 @@
 import { spawn } from 'child_process'
 import readline from 'readline'
 
-// I/TAG( 1234): message: fruit=banana?
-const LOG_LINE  = /([A-Z])\/(.+)\( *(\d+)\): (.*)/
+// I/TAG   ( 1234): message: fruit=banana?
+const LOG_LINE  = /^([A-Z])\/(\S+)\s*\( *(\d+)\): (.*)$/
 
 // input
 const start = (callback) => {
   const adb = spawn('adb', ['logcat', '-v', 'brief']);
-  // const adb = spawn('adb', ['logcat']);
 
   const rl = readline.createInterface({
     input: adb.stdout,
