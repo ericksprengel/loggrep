@@ -89,14 +89,18 @@ const main = async () => {
     const tagWithPad = tag === LAST_TAG
       ? ' '.repeat(25)
       : tag.substring(0,25).padStart(25, ' ')
-    const tagWithLevel = chalk`{${TAG_COLORS[tag]} ${tagWithPad}} {${LEVEL_COLOR[level]}  ${level} }`
+    const tagWithLevel = chalk`{${TAG_COLORS[tag]} ${tagWithPad} }{${LEVEL_COLOR[level]}  ${level} }`
 
-    const messageLines = message.match(MESSAGE_LINE_SPLITER)
-    for (let i = 0; i < messageLines.length; i++) {
-      if (i === 0) {
-        log(`${tagWithLevel} ${messageLines[i]}`)
-      } else {
-        log(`${HEADER_EMPTY}${messageLines[i]}`)
+    if (!message) {
+      log(`${tagWithLevel} ${message}`)
+    } else {
+      const messageLines = message.match(MESSAGE_LINE_SPLITER)
+      for (let i = 0; i < messageLines.length; i++) {
+        if (i === 0) {
+          log(`${tagWithLevel} ${messageLines[i]}`)
+        } else {
+          log(`${HEADER_EMPTY}${messageLines[i]}`)
+        }
       }
     }
     LAST_TAG = tag
