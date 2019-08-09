@@ -2,11 +2,14 @@
   "name": "loggrep",
   "version": "0.0.1",
   "description": "Loggrep is a awesome tool to analyze logs with custom filters and views",
-  "main": "index.js",
+  "main": "index.mjs",
   "repository": "https://github.com/ericksprengel/loggrep",
   "author": "Erick Massa Sprengel",
   "license": "MIT",
   "scripts": {
     "exec": "node --experimental-modules index.mjs"
+  },
+  "bin": {
+    "loggrep": "index.mjs"
   }
 }

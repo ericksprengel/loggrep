@@ -1,3 +1,4 @@
+#!/usr/bin/env node --experimental-modules
 import { start } from './src/input/adb.mjs'
 
 start((line, level, tag, pid, message) => {
