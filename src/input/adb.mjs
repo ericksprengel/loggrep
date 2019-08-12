@@ -16,7 +16,7 @@ const start = (callback) => {
   // adb.stdout.on('data', (data) => {
     const res = LOG_LINE.exec(line)
     if (!res) {
-      console.log('IGNORING: ', res)
+      //console.log('IGNORING: ', line)
       return
     }
     const [

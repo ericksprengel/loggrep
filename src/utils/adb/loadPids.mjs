@@ -3,19 +3,27 @@ import readline from 'readline'
 import util from 'util'
 
 const execP = util.promisify(exec)
-// I/TAG   ( 1234): message: fruit=banana?
-const PS_LINE  = /^([A-Z])\/\s*(\S*)\s*\( *(\d+)\): (.*)$/
+// USER           PID  PPID     VSZ    RSS WCHAN            ADDR S NAME
+// u0_a85        9195  1759 1885328 361580 0                   0 S br.com.stone.mais.development
+const PS_LINE  = /^(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/
 
 // input
-const loadPids = async (callback) => {
+const loadPids = async (packages) => {
   const {error, stdout, stderr} = await execP('adb shell ps')
   if (error) {
     console.error(`exec error: ${error}`);
-    return;
+    process.exit(1);
   }
-  console.log(`stdout: ${stdout}`);
-  console.log(`stderr: ${stderr}`);
-  return '9195'
+  const pids = []
+  for (let line of stdout.split(/\r?\n/)) {
+    const res = PS_LINE.exec(line) || []
+    const pid = res[2]
+    const name = res[9]
+    if (packages.includes(name)) {
+      pids.push(pid)
+    }
+  }
+  return pids
 }
 
 export {
