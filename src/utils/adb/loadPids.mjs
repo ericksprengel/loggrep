@@ -5,7 +5,8 @@ import util from 'util'
 const execP = util.promisify(exec)
 // USER           PID  PPID     VSZ    RSS WCHAN            ADDR S NAME
 // u0_a85        9195  1759 1885328 361580 0                   0 S br.com.stone.mais.development
-const PS_LINE  = /^(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/
+// u0_a296   25404 288   1456592 204380 ffffffff 00000000 S br.com.stone.mais.development
+const PS_LINE  = /^(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\S+)\s+(.*)$/
 
 // input
 const loadPids = async (packages) => {
