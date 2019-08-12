@@ -1,8 +1,11 @@
-const filters = [
-  { tag: /^SPRENGEL$/ },
-  { message: /SPRENGEL/ },
-]
+export default async (config) => {
+  console.log(config)
+  const filters = [
+    { tag: /^SPRENGEL$/ },
+    { message: /SPRENGEL/ },
+  ]
 
-export {
-  filters,
+  return {
+    filters,
+  }
 }

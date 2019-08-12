@@ -3,6 +3,11 @@ import ansiStyles from 'ansi-styles'
 import chalk from 'chalk'
 import { start } from './src/input/adb.mjs'
 
+const CONFIG = {
+  packages: [
+    'br.com.stone.mais.development',
+  ],
+}
 const log = console.log
 
 const COLORS = [
@@ -37,10 +42,12 @@ const TAG_COLORS = {
   'ReactNativeJS': 'white.bgBlackBright',
 }
 
-const loadFilters = (filterPaths) => 
-  Promise.all(filterPaths.map((filterPath) => {
-    return import(`./src/filters/${filterPath}`)
+const loadFilters = async (config, filterPaths) => {
+  const mods = await Promise.all(filterPaths.map((filterPath) => {
+    return import(`./src/filters/${filterPath}.mjs`)
   }))
+  return Promise.all(mods.map(mod => mod.default(config)))
+}
 
 const shouldShowIt = (filterModules, line, level, tag, pid, message) => {
   for (const filterModule of filterModules) {
@@ -63,7 +70,7 @@ const shouldShowIt = (filterModules, line, level, tag, pid, message) => {
 const main = async () => {
   let FILTER_MODULES
   try {
-    FILTER_MODULES = await loadFilters([
+    FILTER_MODULES = await loadFilters(CONFIG, [
       'pidcat',
       'sprengel',
     ])

@@ -1,15 +1,11 @@
-import { spawn } from 'child_process'
-import readline from 'readline'
-
+import { loadPids } from '../utils/adb/index.mjs'
 const APP_START = /ADD_APP_START/
 const APP_END = /ADD_APP_END/
 
-const loadPidsByPackage = () => {
-  // adb shell ps
-}
-
 export default async ({ packages = [] }) => {
-  let PIDS = loadPidsByPackages(packages)
+  let PIDS = await loadPids(packages)
+  console.log('PIDS:', PIDS)
+
 
   const pidcatFilter = (line, level, tag, pid, message) => {
     return PIDS.includes(pid)
