@@ -1,17 +1,18 @@
+import log from '../utils/log.mjs'
 import { loadPids } from '../utils/adb/index.mjs'
 const APP_START = /ADD_APP_START/
 const APP_END = /ADD_APP_END/
 
 export default async ({ packages = [] }) => {
   let PIDS = await loadPids(packages)
-  console.log('PIDS:', PIDS)
+  log.i('PIDS:', PIDS)
 
 
-  const pidcatFilter = (line, level, tag, pid, message) => {
+  const pidcatFilter = ({line, level, tag, pid, message}) => {
     return PIDS.includes(pid)
   }
 
-  const onNewLine = (line, level, tag, pid, message) => {
+  const onNewLine = ({line, level, tag, pid, message}) => {
     // TODO: update PIDS
     if (APP_END.test(message)) {
       PIDS = PIDS.filter(pidCached => pidCached !== pid)
