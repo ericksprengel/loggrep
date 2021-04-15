@@ -1,10 +1,10 @@
-import log from '../utils/log.mjs'
+import log from '../utils/log'
 
 const loadFilters = async (config, filterPaths) => {
   try {
     const mods = await Promise.all(filterPaths.map((filterPath) => {
       if (filterPath.startsWith('@')) {
-        return import(`../filters/${filterPath.substr(1)}.mjs`)
+        return import(`../filters/${filterPath.substr(1)}.js`)
       }
       return import(`${process.cwd()}/${filterPath}`)
     }))

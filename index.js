@@ -1,10 +1,12 @@
 #!/usr/bin/env node --experimental-modules
 import commander from 'commander'
-import main from './src/core/index.mjs'
+import main from './src/core/index'
 
 const CONFIG = {
   packages: [
     'br.com.comunicap',
+    'br.com.stone.ton.development',
+    'br.com.stone.ton',
   ],
 }
 

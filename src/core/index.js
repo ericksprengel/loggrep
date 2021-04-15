@@ -1,7 +1,7 @@
-import loadFilters from './loadFilters.mjs'
-import logEntry from './logEntry.mjs'
-import shouldShowLogEntry from './shouldShowLogEntry.mjs'
-import { start } from '../input/adb.mjs'
+import loadFilters from './loadFilters'
+import logEntry from './logEntry'
+import shouldShowLogEntry from './shouldShowLogEntry'
+import { start } from '../input/adb'
 
 const main = async (filters, config) => {
 

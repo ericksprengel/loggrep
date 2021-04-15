@@ -1,5 +1,5 @@
-import log from '../utils/log.mjs'
-import { loadPids } from '../utils/adb/index.mjs'
+import log from '../utils/log.js'
+import { loadPids } from '../utils/adb/index.js'
 const APP_START = /ADD_APP_START/
 const APP_END = /ADD_APP_END/
 

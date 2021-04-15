@@ -1,6 +1,6 @@
 import ansiStyles from 'ansi-styles'
 import chalk from 'chalk'
-import log from '../utils/log.mjs'
+import log from '../utils/log'
 
 const COLORS = [
   // 'black',
