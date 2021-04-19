@@ -19,7 +19,7 @@ $ npm install -g loggrep
 $ loggrep COMMAND
 running command...
 $ loggrep (-v|--version|version)
-loggrep/0.0.0 darwin-x64 node-v15.3.0
+loggrep/1.0.0 darwin-x64 node-v15.3.0
 $ loggrep --help [COMMAND]
 USAGE
   $ loggrep COMMAND
@@ -30,7 +30,7 @@ USAGE
 <!-- commands -->
 * [`loggrep hello [FILE]`](#loggrep-hello-file)
 * [`loggrep help [COMMAND]`](#loggrep-help-command)
-* [`loggrep logcat [FILE]`](#loggrep-logcat-file)
+* [`loggrep logcat`](#loggrep-logcat)
 
 ## `loggrep hello [FILE]`
 
@@ -50,7 +50,7 @@ EXAMPLE
   hello world from ./src/hello.ts!
 ```
 
-_See code: [src/commands/hello.ts](https://github.com/ericksprengel/loggrep/blob/v0.0.0/src/commands/hello.ts)_
+_See code: [src/commands/hello.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/hello.ts)_
 
 ## `loggrep help [COMMAND]`
 
@@ -69,19 +69,19 @@ OPTIONS
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
 
-## `loggrep logcat [FILE]`
+## `loggrep logcat`
 
 describe the command here
 
 ```
 USAGE
-  $ loggrep logcat [FILE]
+  $ loggrep logcat
 
 OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+  -c, --config=config    config file
+  -f, --filters=filters  [default: @all] filters
+  -h, --help             show CLI help
 ```
 
-_See code: [src/commands/logcat.ts](https://github.com/ericksprengel/loggrep/blob/v0.0.0/src/commands/logcat.ts)_
+_See code: [src/commands/logcat.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/logcat.ts)_
 <!-- commandsstop -->
