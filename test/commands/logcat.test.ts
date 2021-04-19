@@ -4,14 +4,15 @@ describe('logcat', () => {
   test
   .stdout()
   .command(['logcat'])
-  .it('runs hello', ctx => {
-    expect(ctx.stdout).to.contain('hello world')
+  .it('runs default', ctx => {
+    expect(ctx.stdout).to.contain('config \'{"packages":["br.com.comunicap","br.com.stone.ton.development","br.com.stone.ton"]}\'\n')
+    expect(ctx.stdout).to.contain('filters: @all')
   })
 
   test
   .stdout()
-  .command(['logcat', '--name', 'jeff'])
-  .it('runs hello --name jeff', ctx => {
-    expect(ctx.stdout).to.contain('hello jeff')
+  .command(['logcat', '-f', '@banana', '@batata'])
+  .it('runs with -f @banana @batata', ctx => {
+    expect(ctx.stdout).to.contain('filters: @banana, @batata')
   })
 })
