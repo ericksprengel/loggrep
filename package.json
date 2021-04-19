@@ -1,7 +1,7 @@
 {
   "name": "loggrep",
   "description": "Loggrep is a awesome tool to analyze logs with custom filters and views",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Erick Massa Sprengel @ericksprengel",
   "bin": {
     "loggrep": "bin/run"

@@ -19,7 +19,7 @@ $ npm install -g loggrep
 $ loggrep COMMAND
 running command...
 $ loggrep (-v|--version|version)
-loggrep/1.0.0 darwin-x64 node-v15.3.0
+loggrep/1.0.1 darwin-x64 node-v15.3.0
 $ loggrep --help [COMMAND]
 USAGE
   $ loggrep COMMAND
@@ -50,7 +50,7 @@ EXAMPLE
   hello world from ./src/hello.ts!
 ```
 
-_See code: [src/commands/hello.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/hello.ts)_
+_See code: [src/commands/hello.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.1/src/commands/hello.ts)_
 
 ## `loggrep help [COMMAND]`
 
@@ -83,5 +83,5 @@ OPTIONS
   -h, --help             show CLI help
 ```
 
-_See code: [src/commands/logcat.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/logcat.ts)_
+_See code: [src/commands/logcat.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.1/src/commands/logcat.ts)_
 <!-- commandsstop -->
