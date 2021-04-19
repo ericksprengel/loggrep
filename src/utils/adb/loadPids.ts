@@ -11,11 +11,12 @@ const PS_LINE  = /^(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\S+)
 
 // input
 const loadPids = async (packages: string[]) => {
-  const {error, stdout} = await execP('adb shell ps')
-  if (error) {
-    log.e(`exec error: ${error}`)
-    process.exit(1)
-  }
+  // eslint-disable-next-line spaced-comment
+  const {/*error,*/stdout} = await execP('adb shell ps')
+  // if (error) {
+  //   log.e(`exec error: ${error}`)
+  //   process.exit(1)
+  // }
   const pids = []
   for (const line of stdout.split(/\r?\n/)) {
     const res = PS_LINE.exec(line) || []
