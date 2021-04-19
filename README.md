@@ -30,6 +30,7 @@ USAGE
 <!-- commands -->
 * [`loggrep hello [FILE]`](#loggrep-hello-file)
 * [`loggrep help [COMMAND]`](#loggrep-help-command)
+* [`loggrep logcat [FILE]`](#loggrep-logcat-file)
 
 ## `loggrep hello [FILE]`
 
@@ -67,4 +68,20 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
+
+## `loggrep logcat [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ loggrep logcat [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/logcat.ts](https://github.com/ericksprengel/loggrep/blob/v0.0.0/src/commands/logcat.ts)_
 <!-- commandsstop -->
