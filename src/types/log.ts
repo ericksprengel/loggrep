@@ -9,7 +9,7 @@ export interface LogEntry {
   message?: string;
 }
 
-export type FilterFunction = () => boolean
+export type FilterFunction = (logEntry: LogEntry) => boolean
 
 export interface FilterRegExp {
   line?: RegExp;
@@ -22,9 +22,14 @@ export interface FilterRegExp {
 export type Filter = FilterRegExp | FilterFunction
 
 export interface LoggrepHandlerInstance {
-  filters: Filter[];
+  filters?: Filter[];
+  hooks?: {
+    onNewLine: (logEntry: LogEntry) => void;
+  };
 }
 
 export type LoggrepHandler = (config: object) => Promise<LoggrepHandlerInstance>
 
-export type LoggrepConfig = object
+export interface LoggrepConfig {
+  packages?: string[];
+}
