@@ -1,5 +1,6 @@
 import {Command, flags} from '@oclif/command'
 import * as Parser from '@oclif/parser'
+import main from '../core'
 import {readJsonFile} from '../utils/json'
 
 const CONFIG = {
@@ -42,5 +43,6 @@ export default class Logcat extends Command {
     // console.log({filters, config})
     this.log('config %O', JSON.stringify(config))
     this.log('filters: %s', filters.join(', '))
+    await main(filters, config)
   }
 }
