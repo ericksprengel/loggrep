@@ -11,7 +11,15 @@ export interface LogEntry {
 
 export type FilterFunction = () => boolean
 
-export type Filter = RegExp | FilterFunction
+export interface FilterRegExp {
+  line?: RegExp;
+  level?: RegExp;
+  tag?: RegExp;
+  pid?: RegExp;
+  message?: RegExp;
+}
+
+export type Filter = FilterRegExp | FilterFunction
 
 export interface LoggrepHandlerInstance {
   filters: Filter[];
