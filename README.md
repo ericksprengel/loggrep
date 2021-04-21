@@ -1,99 +1,87 @@
-# loggrep
-Loggrep is a awesome tool to analyze logs with custom filters and views.
+loggrep
+=======
 
-It's totally inspired on [pidcat from Jake Wharton](https://github.com/JakeWharton/pidcat)
+Loggrep is a awesome tool to analyze logs with custom filters and views
 
-# Why loggrep?
+[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
+[![Version](https://img.shields.io/npm/v/loggrep.svg)](https://npmjs.org/package/loggrep)
+[![Downloads/week](https://img.shields.io/npm/dw/loggrep.svg)](https://npmjs.org/package/loggrep)
+[![License](https://img.shields.io/npm/l/loggrep.svg)](https://github.com/ericksprengel/loggrep/blob/master/package.json)
 
-Filter adb logcat output is a painful task.
-If you'd like to filter by tag, message, log level or pid; you probably already used a combination of grep commands.
-But if you are debugging Android OS (framework, applications, radio etc.) in debug mode, you know that it's impossible to handle it.
-
-`loggrep` is a tool with powerful and customizable filters/formatters that will help you.
-
-
-P.S.: if you're trying to filter only your application log, you just need [Jake Wharton's pidcat](https://github.com/JakeWharton/pidcat)
-
-# Install
-
-```shell
-$ npm install -g loggrep
-```
-
+<!-- toc -->
+* [Usage](#usage)
+* [Commands](#commands)
+<!-- tocstop -->
 # Usage
+<!-- usage -->
+```sh-session
+$ npm install -g loggrep
+$ loggrep COMMAND
+running command...
+$ loggrep (-v|--version|version)
+loggrep/1.0.0 darwin-x64 node-v15.3.0
+$ loggrep --help [COMMAND]
+USAGE
+  $ loggrep COMMAND
+...
+```
+<!-- usagestop -->
+# Commands
+<!-- commands -->
+* [`loggrep hello [FILE]`](#loggrep-hello-file)
+* [`loggrep help [COMMAND]`](#loggrep-help-command)
+* [`loggrep logcat`](#loggrep-logcat)
 
-### Log everything:
-```shell
-$ loggrep logcat @all
+## `loggrep hello [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ loggrep hello [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+
+EXAMPLE
+  $ loggrep hello
+  hello world from ./src/hello.ts!
 ```
 
-### Custom log:
+_See code: [src/commands/hello.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/hello.ts)_
 
-Create `myLog.mjs`
-```js
-export default async (config) => {
-  /**
-   * Here you can initialize your module
-   * with `config` param.
-   * 
-   * In this example all log lines
-   * with tag `Choreographer`
-   * OR with messages containing
-   * `leak` word will be printed.
-   **/
-  return {
-    filters: [
-      { tag: /^Choreographer$/ },
-      { message: /leak/ },
-    ],
-  }
-}
+## `loggrep help [COMMAND]`
+
+display help for loggrep
+
 ```
-Run:
-```shell
-$ loggrep logcat ./mylog.mjs
+USAGE
+  $ loggrep help [COMMAND]
+
+ARGUMENTS
+  COMMAND  command to show help for
+
+OPTIONS
+  --all  see all commands in CLI
 ```
 
-## Advanced
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
 
-### Combining filter modules
+## `loggrep logcat`
 
-```shell
-$ loggrep logcat ./mylog1.mjs ./mylog2.mjs
+describe the command here
+
+```
+USAGE
+  $ loggrep logcat
+
+OPTIONS
+  -c, --config=config    config file
+  -f, --filters=filters  [default: @all] filters
+  -h, --help             show CLI help
 ```
 
-P.S.: a log line is printed if at least one filter accepts it. Remember it's always using `OR` logic operator
-
-### Custom filter functions
-
-```js
-export default async (config) => {
-  /**
-   * In this example all log lines
-   * with tag `Choreographer`
-   * AND skipping 50 frames are shown.
-   * It could be improved to check
-   * if more than 50 frames were
-   * skipped, but it's just an
-   * example.
-   **/
-  const wasSkippedTooManyFrames = ({
-    line,
-    level,
-    tag,
-    pid,
-    message,
-  }) => {
-    return (
-      tag === 'Choreographer'
-      && message.startsWith('Skipped 50 frames!')
-    )
-  }
-
-  return {
-    filters: [
-      wasSkippedTooManyFrames,
-    ],
-  }
-}
-```
+_See code: [src/commands/logcat.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/logcat.ts)_
+<!-- commandsstop -->

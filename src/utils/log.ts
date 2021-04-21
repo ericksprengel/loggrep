@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const log = {
   i: console.log,
   w: console.warn,

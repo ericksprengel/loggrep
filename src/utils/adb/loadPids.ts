@@ -1,6 +1,7 @@
-import { exec } from 'child_process'
-import readline from 'readline'
-import util from 'util'
+/* eslint-disable unicorn/filename-case */
+import {exec} from 'child_process'
+import * as util from 'util'
+import log from '../log'
 
 const execP = util.promisify(exec)
 // USER           PID  PPID     VSZ    RSS WCHAN            ADDR S NAME
@@ -9,14 +10,14 @@ const execP = util.promisify(exec)
 const PS_LINE  = /^(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\S+)\s+(.*)$/
 
 // input
-const loadPids = async (packages) => {
-  const {error, stdout, stderr} = await execP('adb shell ps')
+const loadPids = async (packages: string[]) => {
+  const {error, stdout} = await execP('adb shell ps')
   if (error) {
-    console.error(`exec error: ${error}`);
-    process.exit(1);
+    log.e(`exec error: ${error}`)
+    process.exit(1)
   }
   const pids = []
-  for (let line of stdout.split(/\r?\n/)) {
+  for (const line of stdout.split(/\r?\n/)) {
     const res = PS_LINE.exec(line) || []
     const pid = res[2]
     const name = res[9]
