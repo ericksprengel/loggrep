@@ -11,6 +11,89 @@ It's totally inspired on [pidcat from Jake Wharton](https://github.com/JakeWhart
 [![Downloads/week](https://img.shields.io/npm/dw/loggrep.svg)](https://npmjs.org/package/loggrep)
 [![License](https://img.shields.io/npm/l/loggrep.svg)](https://github.com/ericksprengel/loggrep/blob/master/package.json)
 
+# Getting Started
+
+Show all logcat log entries
+```shell
+npx loggrep logcat -f=@all
+```
+
+Available filters:
+ - [@all](https://github.com/ericksprengel/loggrep/blob/master/src/filters/all.ts)
+ - [@none](https://github.com/ericksprengel/loggrep/blob/master/src/filters/none.ts)
+ - [@pidcat](https://github.com/ericksprengel/loggrep/blob/master/src/filters/pidcat.ts)
+ - [@banana](https://github.com/ericksprengel/loggrep/blob/master/src/filters/banana.ts)
+
+
+### My custom filter
+
+```shell
+npx loggrep logcat -f=./banana.js
+```
+
+`./banana.js` :
+```javascript
+const handler = async () => {
+  const filters = [
+    // filter "ActivityManager" tag
+    {tag: /^ActivityManager$/},
+  ]
+
+  return {
+    filters,
+  }
+}
+
+exports.handler = handler
+```
+
+More examples like `./banana.js`:
+```javascript
+const handler = async () => {
+  const filters = [
+    // filter "Zygote" tag
+    {tag: /^Zygote$/},
+
+    // filter "Error" level
+    {level: /^E$/},
+
+    // filter process with pid "1234"
+    {pid: /^1234$/},
+
+    // filter log entries with tag "ActivityManager" and messages starting with "Received BROADCAST intent"
+    {
+      tag: /^ActivityManager$/,
+      message: /^Received BROADCAST intent/
+    },
+
+    // custom function
+    // return true to show a log entry
+    ({
+      tag, line, level, tag, pid, message
+    }) => tag.endsWith('Manager'),
+  ]
+
+  return {
+    filters,
+  }
+}
+
+exports.handler = handler
+```
+
+# Why loggrep?
+
+Filter adb logcat output is a painful task.
+If you'd like to filter by tag, message, log level or pid; you probably already used a combination of grep commands.
+But if you are debugging Android OS (framework, applications, radio etc.) in debug mode, you know that it's impossible to handle it.
+
+`loggrep` is a tool with powerful and customizable filters/formatters that will help you.
+
+
+P.S.: if you're trying to filter only your application log, you just need [Jake Wharton's pidcat](https://github.com/JakeWharton/pidcat)
+
+
+
 <!-- toc -->
 * [Usage](#usage)
 * [Commands](#commands)
