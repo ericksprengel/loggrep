@@ -95,6 +95,8 @@ P.S.: if you're trying to filter only your application log, you just need [Jake 
 
 
 <!-- toc -->
+* [Getting Started](#getting-started)
+* [Why loggrep?](#why-loggrep)
 * [Usage](#usage)
 * [Commands](#commands)
 <!-- tocstop -->
@@ -105,7 +107,7 @@ $ npm install -g loggrep
 $ loggrep COMMAND
 running command...
 $ loggrep (--version)
-loggrep/2.0.1 darwin-x64 node-v16.13.1
+loggrep/2.0.2 darwin-x64 node-v16.13.1
 $ loggrep --help [COMMAND]
 USAGE
   $ loggrep COMMAND
@@ -147,7 +149,7 @@ EXAMPLES
   hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
-_See code: [dist/commands/hello/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.1/dist/commands/hello/index.ts)_
+_See code: [dist/commands/hello/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.2/dist/commands/hello/index.ts)_
 
 ## `loggrep hello world`
 
@@ -207,7 +209,7 @@ EXAMPLES
   $ loggrep logcat --f=./myfilter
 ```
 
-_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.1/dist/commands/logcat/index.ts)_
+_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.2/dist/commands/logcat/index.ts)_
 
 ## `loggrep plugins`
 
