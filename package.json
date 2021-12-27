@@ -1,7 +1,7 @@
 {
   "name": "loggrep",
   "description": "Loggrep is a awesome tool to analyze logs with custom filters and views",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "author": "Erick Massa Sprengel",
   "bin": {
     "loggrep": "./bin/run"
@@ -55,9 +55,6 @@
     ],
     "topicSeparator": " ",
     "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
-      },
       "logcat": {
         "description": "android logcat"
       }
