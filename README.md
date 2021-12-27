@@ -18,8 +18,8 @@ Loggrep is a awesome tool to analyze logs with custom filters and views
 $ npm install -g loggrep
 $ loggrep COMMAND
 running command...
-$ loggrep (-v|--version|version)
-loggrep/1.0.0 darwin-x64 node-v15.3.0
+$ loggrep (--version)
+loggrep/2.0.0 darwin-x64 node-v16.13.1
 $ loggrep --help [COMMAND]
 USAGE
   $ loggrep COMMAND
@@ -28,46 +28,76 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`loggrep hello [FILE]`](#loggrep-hello-file)
+* [`loggrep hello PERSON`](#loggrep-hello-person)
+* [`loggrep hello world`](#loggrep-hello-world)
 * [`loggrep help [COMMAND]`](#loggrep-help-command)
 * [`loggrep logcat`](#loggrep-logcat)
+* [`loggrep plugins`](#loggrep-plugins)
+* [`loggrep plugins:inspect PLUGIN...`](#loggrep-pluginsinspect-plugin)
+* [`loggrep plugins:install PLUGIN...`](#loggrep-pluginsinstall-plugin)
+* [`loggrep plugins:link PLUGIN`](#loggrep-pluginslink-plugin)
+* [`loggrep plugins:uninstall PLUGIN...`](#loggrep-pluginsuninstall-plugin)
+* [`loggrep plugins update`](#loggrep-plugins-update)
 
-## `loggrep hello [FILE]`
+## `loggrep hello PERSON`
 
-describe the command here
+Say hello
 
 ```
 USAGE
-  $ loggrep hello [FILE]
+  $ loggrep hello [PERSON] -f <value>
 
-OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
+ARGUMENTS
+  PERSON  Person to say hello to
 
-EXAMPLE
-  $ loggrep hello
-  hello world from ./src/hello.ts!
+FLAGS
+  -f, --from=<value>  (required) Whom is saying hello
+
+DESCRIPTION
+  Say hello
+
+EXAMPLES
+  $ oex hello friend --from oclif
+  hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
-_See code: [src/commands/hello.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/hello.ts)_
+_See code: [dist/commands/hello/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.0/dist/commands/hello/index.ts)_
+
+## `loggrep hello world`
+
+Say hello world
+
+```
+USAGE
+  $ loggrep hello world
+
+DESCRIPTION
+  Say hello world
+
+EXAMPLES
+  $ oex hello world
+  hello world! (./src/commands/hello/world.ts)
+```
 
 ## `loggrep help [COMMAND]`
 
-display help for loggrep
+Display help for loggrep.
 
 ```
 USAGE
-  $ loggrep help [COMMAND]
+  $ loggrep help [COMMAND] [-n]
 
 ARGUMENTS
-  COMMAND  command to show help for
+  COMMAND  Command to show help for.
 
-OPTIONS
-  --all  see all commands in CLI
+FLAGS
+  -n, --nested-commands  Include all nested commands in the output.
+
+DESCRIPTION
+  Display help for loggrep.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.2/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.9/src/commands/help.ts)_
 
 ## `loggrep logcat`
 
@@ -75,13 +105,167 @@ describe the command here
 
 ```
 USAGE
-  $ loggrep logcat
+  $ loggrep logcat [-h] [-f <value>] [-c <value>]
 
-OPTIONS
-  -c, --config=config    config file
-  -f, --filters=filters  [default: @all] filters
-  -h, --help             show CLI help
+FLAGS
+  -c, --config=<value>      config file
+  -f, --filters=<value>...  [default: @all] filters
+  -h, --help                Show CLI help.
+
+DESCRIPTION
+  describe the command here
+
+EXAMPLES
+  $ loggrep logcat --f=@all
+
+  $ loggrep logcat --f=./myfilter
 ```
 
-_See code: [src/commands/logcat.ts](https://github.com/ericksprengel/loggrep/blob/v1.0.0/src/commands/logcat.ts)_
+_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.0/dist/commands/logcat/index.ts)_
+
+## `loggrep plugins`
+
+List installed plugins.
+
+```
+USAGE
+  $ loggrep plugins [--core]
+
+FLAGS
+  --core  Show core plugins.
+
+DESCRIPTION
+  List installed plugins.
+
+EXAMPLES
+  $ loggrep plugins
+```
+
+_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.0.11/src/commands/plugins/index.ts)_
+
+## `loggrep plugins:inspect PLUGIN...`
+
+Displays installation properties of a plugin.
+
+```
+USAGE
+  $ loggrep plugins:inspect PLUGIN...
+
+ARGUMENTS
+  PLUGIN  [default: .] Plugin to inspect.
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Displays installation properties of a plugin.
+
+EXAMPLES
+  $ loggrep plugins:inspect myplugin
+```
+
+## `loggrep plugins:install PLUGIN...`
+
+Installs a plugin into the CLI.
+
+```
+USAGE
+  $ loggrep plugins:install PLUGIN...
+
+ARGUMENTS
+  PLUGIN  Plugin to install.
+
+FLAGS
+  -f, --force    Run yarn install with force flag.
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Installs a plugin into the CLI.
+
+  Can be installed from npm or a git url.
+
+  Installation of a user-installed plugin will override a core plugin.
+
+  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
+  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
+  the CLI without the need to patch and update the whole CLI.
+
+ALIASES
+  $ loggrep plugins add
+
+EXAMPLES
+  $ loggrep plugins:install myplugin 
+
+  $ loggrep plugins:install https://github.com/someuser/someplugin
+
+  $ loggrep plugins:install someuser/someplugin
+```
+
+## `loggrep plugins:link PLUGIN`
+
+Links a plugin into the CLI for development.
+
+```
+USAGE
+  $ loggrep plugins:link PLUGIN
+
+ARGUMENTS
+  PATH  [default: .] path to plugin
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Links a plugin into the CLI for development.
+
+  Installation of a linked plugin will override a user-installed or core plugin.
+
+  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
+  command will override the user-installed or core plugin implementation. This is useful for development work.
+
+EXAMPLES
+  $ loggrep plugins:link myplugin
+```
+
+## `loggrep plugins:uninstall PLUGIN...`
+
+Removes a plugin from the CLI.
+
+```
+USAGE
+  $ loggrep plugins:uninstall PLUGIN...
+
+ARGUMENTS
+  PLUGIN  plugin to uninstall
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Removes a plugin from the CLI.
+
+ALIASES
+  $ loggrep plugins unlink
+  $ loggrep plugins remove
+```
+
+## `loggrep plugins update`
+
+Update installed plugins.
+
+```
+USAGE
+  $ loggrep plugins update [-h] [-v]
+
+FLAGS
+  -h, --help     Show CLI help.
+  -v, --verbose
+
+DESCRIPTION
+  Update installed plugins.
+```
 <!-- commandsstop -->

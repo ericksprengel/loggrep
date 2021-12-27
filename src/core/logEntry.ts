@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/filename-case */
 import * as chalk from 'chalk'
 import log from '../utils/log'
 import {LogEntry} from '../types/log'
@@ -47,6 +46,7 @@ const logEntry = ({level, tag, message}: LogEntry) => {
     ' '.repeat(25) :
     tag.substring(0, 25).padStart(25, ' ')
 
+  // before upgrade chalk to 5.0: https://github.com/microsoft/TypeScript/issues/46930
   const tagWithLevel = chalk`{${TAG_COLORS[tag]} ${tagWithPad} }{${LEVEL_COLOR[level]}  ${level} }`
 
   if (message) {

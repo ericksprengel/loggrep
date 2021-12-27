@@ -30,6 +30,4 @@ export interface LoggrepHandlerInstance {
 
 export type LoggrepHandler = (config: object) => Promise<LoggrepHandlerInstance>
 
-export interface LoggrepConfig {
-  packages?: string[];
-}
+export type LoggrepConfig = any

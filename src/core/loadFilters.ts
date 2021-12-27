@@ -7,20 +7,24 @@ const loadFilters = async (
   filterPaths: string[],
 ): Promise<LoggrepHandlerInstance[]> => {
   try {
+    // load modules
     const handlers = await Promise.all(filterPaths.map(async (filterPath: string): Promise<LoggrepHandler> => {
       if (filterPath.startsWith('@')) {
+        // load embedded filters (eg: @all, @none, @pidcat)
         return (await import(`../filters/${filterPath.substr(1)}`)).handler
       }
+      // load custom filters (eg: ./myapp.ts, ./myerros.ts)
       return (await import(`${process.cwd()}/${filterPath}`)).handler
     }))
+
+    // load filter instances
     return Promise.all(handlers.map(handler => handler(config)))
   } catch (error) {
     log.e('Failed to load filters')
-    log.e(`error message (${error.name}): ${error.message}`)
+    throw error
     // if (error instanceof SyntaxError) {
     //   log.e('linha:', error.lineNumber)
     // }
-    throw new Error(`Failed to load filter (${error.name}): ${error.message}`)
   }
 }
 

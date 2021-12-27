@@ -6,7 +6,7 @@ const APP_START = /ADD_APP_START/
 const APP_END = /ADD_APP_END/
 
 export const handler: LoggrepHandler = async (config: LoggrepConfig) => {
-  const packages = config.packages ?? []
+  const packages: string[] = config?.packages ?? []
   let PIDS = await loadPids(packages)
   log.i('PIDS:', PIDS)
 
