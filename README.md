@@ -3,6 +3,9 @@ loggrep
 
 Loggrep is a awesome tool to analyze logs with custom filters and views
 
+It's totally inspired on [pidcat from Jake Wharton](https://github.com/JakeWharton/pidcat)
+
+
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/loggrep.svg)](https://npmjs.org/package/loggrep)
 [![Downloads/week](https://img.shields.io/npm/dw/loggrep.svg)](https://npmjs.org/package/loggrep)
@@ -19,7 +22,7 @@ $ npm install -g loggrep
 $ loggrep COMMAND
 running command...
 $ loggrep (--version)
-loggrep/2.0.0 darwin-x64 node-v16.13.1
+loggrep/2.0.1 darwin-x64 node-v16.13.1
 $ loggrep --help [COMMAND]
 USAGE
   $ loggrep COMMAND
@@ -61,7 +64,7 @@ EXAMPLES
   hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
-_See code: [dist/commands/hello/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.0/dist/commands/hello/index.ts)_
+_See code: [dist/commands/hello/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.1/dist/commands/hello/index.ts)_
 
 ## `loggrep hello world`
 
@@ -121,7 +124,7 @@ EXAMPLES
   $ loggrep logcat --f=./myfilter
 ```
 
-_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.0/dist/commands/logcat/index.ts)_
+_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.1/dist/commands/logcat/index.ts)_
 
 ## `loggrep plugins`
 
