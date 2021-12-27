@@ -1,7 +1,6 @@
-import {Command, flags} from '@oclif/command'
-import * as Parser from '@oclif/parser'
-import main from '../core'
-import {readJsonFile} from '../utils/json'
+import {Command, Flags} from '@oclif/core'
+import main from '../../core'
+import {readJsonFile} from '../../utils/json'
 
 const CONFIG = {
   packages: [
@@ -14,26 +13,31 @@ const CONFIG = {
 export default class Logcat extends Command {
   static description = 'describe the command here'
 
+  static examples = [
+    `$ loggrep logcat --f=@all`,
+    `$ loggrep logcat --f=./myfilter`,
+  ]
+
   static flags = {
-    help: flags.help({char: 'h'}),
+    help: Flags.help({char: 'h'}),
     // flag with no value (-f, --force)
-    filters: flags.string({
+    filters: Flags.string({
       char: 'f',
       description: 'filters',
       default: ['@all'],
       multiple: true,
     }),
     // flag with no value (-f, --force)
-    config: flags.string({
+    config: Flags.string({
       char: 'c',
       description: 'config file',
     }),
   }
 
-  static args: Parser.args.Input = []
+  static args = []
 
   async run() {
-    const {flags} = this.parse(Logcat)
+    const {args, flags} = await this.parse(Logcat)
     const {filters, config: configFile} = flags
 
     let config = CONFIG
