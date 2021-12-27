@@ -55,9 +55,6 @@
     ],
     "topicSeparator": " ",
     "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
-      },
       "logcat": {
         "description": "android logcat"
       }
