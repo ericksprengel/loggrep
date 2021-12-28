@@ -16,6 +16,8 @@ export default class Logcat extends Command {
   static examples = [
     `$ loggrep logcat --f=@all`,
     `$ loggrep logcat --f=./myfilter`,
+    `$ loggrep logcat -i=../logs/mylog.txt`,
+    `$ loggrep logcat -R`,
   ]
 
   static flags = {
@@ -32,13 +34,21 @@ export default class Logcat extends Command {
       char: 'c',
       description: 'config file',
     }),
+    input: Flags.string({
+      char: 'i',
+      description: 'input path',
+    }),
+    shouldReset: Flags.boolean({
+      char: 'R',
+      description: 'reset adb log',
+    })
   }
 
   static args = []
 
   async run() {
     const {args, flags} = await this.parse(Logcat)
-    const {filters, config: configFile} = flags
+    const {filters, config: configFile, input, shouldReset} = flags
 
     let config = CONFIG
     if (configFile) {
@@ -47,6 +57,6 @@ export default class Logcat extends Command {
     // console.log({filters, config})
     this.log('config %O', JSON.stringify(config))
     this.log('filters: %s', filters.join(', '))
-    await main(filters, config)
+    await main(filters, config, input, shouldReset)
   }
 }

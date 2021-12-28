@@ -4,7 +4,7 @@ import shouldShowLogEntry from './shouldShowLogEntry'
 import {start} from '../input/adb'
 import {LogEntry} from '../types/log'
 
-const main = async (filters: string[], config: object) => {
+const main = async (filters: string[], config: object, input: string|undefined, shouldReset: boolean) => {
   // 1. Load filter modules
   const FILTER_MODULES = await loadFilters(config, filters)
 
@@ -12,17 +12,21 @@ const main = async (filters: string[], config: object) => {
   start((entry: LogEntry): void => {
     // 2.1 Process onNewLine hooks
     for (const loggrepHandlerInstance of FILTER_MODULES) {
-      loggrepHandlerInstance.hooks?.onNewLine(entry)
+      loggrepHandlerInstance.hooks?.onNewLine?.(entry)
     }
 
     // 2.2 Ignore line if no one would show it
     if (!shouldShowLogEntry(FILTER_MODULES, entry)) {
       return
+    } else {
+      for (const loggrepHandlerInstance of FILTER_MODULES) {
+        loggrepHandlerInstance.hooks?.onLineMatch?.(entry)
+      }
     }
 
     // 2.2 LOG IT!
     logEntry(entry)
-  })
+  }, input, shouldReset)
 }
 
 export default main
