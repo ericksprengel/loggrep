@@ -1,7 +1,7 @@
 loggrep
 =======
 
-Loggrep is a awesome tool to analyze logs with custom filters and views
+Loggrep is a awesome tool to analyze/view logcat (Android logs with custom filters and views
 
 It's totally inspired on [pidcat from Jake Wharton](https://github.com/JakeWharton/pidcat)
 
