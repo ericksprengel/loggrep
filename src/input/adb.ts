@@ -1,8 +1,9 @@
 import {spawn, spawnSync} from 'child_process'
-import * as readline from 'readline'
+import {createInterface} from 'readline'
 import log from '../utils/log'
 import {LogEntry, LogLevel} from '../types/log'
-import * as fs from 'fs'
+import {createReadStream} from 'fs'
+import * as dayjs from 'dayjs'
 
 // I/TAG   ( 1234): message: fruit=banana?
 //const LOG_LINE_BRIEF = /^([A-Z])\/\s*(\S*)\s*\( *(\d+)\): (.*)$/
@@ -19,16 +20,16 @@ const start = (callback: (logEntry: LogEntry) => void, input: string|undefined, 
   var stream: NodeJS.ReadableStream;
 
   if (input) {
-    stream = fs.createReadStream(input)
+    stream = createReadStream(input)
   } else {
     if(shouldReset){
       spawnSync("adb", ["logcat", "-c"])
     }
-    adb = spawn("adb", ["logcat", "-v", "threadtime", "-v", "epoch", "-v", "usec"]);
+    adb = spawn("adb", ["logcat", "-v", "threadtime", "-v", "epoch"]);
     stream = adb.stdout
   }
 
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: stream,
   })
 
@@ -47,8 +48,7 @@ const start = (callback: (logEntry: LogEntry) => void, input: string|undefined, 
       process.exit(1)
     }
 
-    const date = new Date(0)
-    date.setUTCMilliseconds(parseFloat(epoch))
+    const date = dayjs.unix(parseFloat(epoch)).toDate()
 
     callback({
       line,
