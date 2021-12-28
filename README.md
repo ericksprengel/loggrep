@@ -107,7 +107,7 @@ $ npm install -g loggrep
 $ loggrep COMMAND
 running command...
 $ loggrep (--version)
-loggrep/2.0.2 darwin-x64 node-v16.13.1
+loggrep/2.1.0 darwin-x64 node-v16.13.1
 $ loggrep --help [COMMAND]
 USAGE
   $ loggrep COMMAND
@@ -151,12 +151,14 @@ describe the command here
 
 ```
 USAGE
-  $ loggrep logcat [-h] [-f <value>] [-c <value>]
+  $ loggrep logcat [-h] [-f <value>] [-c <value>] [-i <value>] [-R]
 
 FLAGS
+  -R, --shouldReset         reset adb log
   -c, --config=<value>      config file
   -f, --filters=<value>...  [default: @all] filters
   -h, --help                Show CLI help.
+  -i, --input=<value>       input path
 
 DESCRIPTION
   describe the command here
@@ -165,9 +167,13 @@ EXAMPLES
   $ loggrep logcat --f=@all
 
   $ loggrep logcat --f=./myfilter
+
+  $ loggrep logcat -i=../logs/mylog.txt
+
+  $ loggrep logcat -R
 ```
 
-_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.0.2/dist/commands/logcat/index.ts)_
+_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.1.0/dist/commands/logcat/index.ts)_
 
 ## `loggrep plugins`
 
