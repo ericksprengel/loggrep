@@ -22,7 +22,7 @@ const start = (callback: (logEntry: LogEntry) => void, input: string|undefined, 
     stream = fs.createReadStream(input)
   } else {
     if(shouldReset){
-      spawnSync("adb", ["-c"])
+      spawnSync("adb", ["logcat", "-c"])
     }
     adb = spawn("adb", ["logcat", "-v", "threadtime", "-v", "epoch", "-v", "usec"]);
     stream = adb.stdout
