@@ -1,8 +1,9 @@
-
 export type LogLevel = 'V' | 'D' | 'I' | 'W' | 'E' | 'F'
 
 export interface LogEntry {
   line: string;
+  epoch?: Date;
+  tid?: string;
   level: LogLevel;
   tag: string;
   pid: string;
@@ -24,7 +25,8 @@ export type Filter = FilterRegExp | FilterFunction
 export interface LoggrepHandlerInstance {
   filters?: Filter[];
   hooks?: {
-    onNewLine: (logEntry: LogEntry) => void;
+    onNewLine?: (logEntry: LogEntry) => void
+    onLineMatch?: (logEntry: LogEntry) => void
   };
 }
 

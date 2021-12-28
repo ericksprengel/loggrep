@@ -1,58 +1,76 @@
-import {spawn} from 'child_process'
+import {spawn, spawnSync} from 'child_process'
 import * as readline from 'readline'
 import log from '../utils/log'
 import {LogEntry, LogLevel} from '../types/log'
+import * as fs from 'fs'
 
 // I/TAG   ( 1234): message: fruit=banana?
-const LOG_LINE  = /^([A-Z])\/\s*(\S*)\s*\( *(\d+)\): (.*)$/
+//const LOG_LINE_BRIEF = /^([A-Z])\/\s*(\S*)\s*\( *(\d+)\): (.*)$/
+
+// 12-23 16:04:20.225  1207  1876 D SemContextService: lock : registerCallback
+//const LOG_LINE_THREADTIME = /^\s*(\d+)\s+(\d\d:\d\d:\d\d.\d\d\d)\s+(\d+)\s+(\d+)\s+([A-Z])\s*(\S*)\s*: (.*)$/
+
+// 1640647366.608	1207  1876 D SemContextService: lock : registerCallback
+const LOG_LINE_EPOCH =  /^\s*([\d.]+)\s+(\d+)\s+(\d+)\s+([A-Z])\s*(\S*)\s*: (.*)$/
 
 // input
-const start = (
-  callback: (logEntry: LogEntry) => void,
-): void => {
-  const adb = spawn('adb', ['logcat', '-v', 'brief'])
+const start = (callback: (logEntry: LogEntry) => void, input: string|undefined, shouldReset: boolean): void => {
+  var adb = null;
+  var stream: NodeJS.ReadableStream;
+
+  if (input) {
+    stream = fs.createReadStream(input)
+  } else {
+    if(shouldReset){
+      spawnSync("adb", ["-c"])
+    }
+    adb = spawn("adb", ["logcat", "-v", "threadtime", "-v", "epoch", "-v", "usec"]);
+    stream = adb.stdout
+  }
 
   const rl = readline.createInterface({
-    input: adb.stdout,
+    input: stream,
   })
 
   rl.on('line', (line: string) => {
-  // adb.stdout.on('data', (data) => {
-    const res = LOG_LINE.exec(line)
+    const res = LOG_LINE_EPOCH.exec(line)
     if (!res) {
       // console.log('IGNORING: ', line)
       return
     }
-    const [
-      fullMatch,
-      level,
-      tag,
-      pid,
-      message,
-    ] = res
+
+    // EPOCH
+    const [fullMatch, epoch, pid, tid, level, tag, message] = res
 
     if (line !== fullMatch) {
       // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
       process.exit(1)
     }
+
+    const date = new Date(0)
+    date.setUTCMilliseconds(parseFloat(epoch))
+
     callback({
       line,
       level: level as LogLevel,
+      epoch: date,
+      tid,
       tag,
       pid,
       message,
     })
   })
 
-  adb.stderr.on('data', (data: any): void => {
-    log.e(`ERROR: ${data}`)
-  })
+  if (adb) {
+    adb.stderr.on("data", (data: any): void => {
+      log.e(`ERROR: ${data}`);
+    });
 
-  adb.on('close', (code: number) => {
-    log.e(`child process exited with code ${code}`)
-  })
+    adb.on("close", (code: number) => {
+      log.e(`child process exited with code ${code}`);
+    });
+  }
+
 }
 
-export {
-  start,
-}
+export { start }
