@@ -15,6 +15,12 @@ describe('logcat parsing', () => {
     expect(parseLogEntry(' 1729512000.123  100  101 E Network : request failed')?.message).toBe('request failed')
     expect(parseLogEntry('1729512000.123 100 101 D App: ')?.message).toBe('')
   })
+  test.each(['My Tag', 'Minha Aplicação', 'My:Tag', ''])('preserves tag %j and separates padding from the message', tag => {
+    const line = `1729512000.123 100 101 D ${tag.padEnd(12)}: detail: request failed  `
+    expect(parseLogEntry(line)).toMatchObject({
+      line, tag, message: 'detail: request failed  ', level: 'D', pid: '100', tid: '101',
+    })
+  })
   test('ignores banners, malformed lines and unknown levels', () => {
     for (const line of ['--------- beginning of main', 'invalid', '1729512000.0 1 2 X App: bad']) {
       expect(parseLogEntry(line)).toBeUndefined()

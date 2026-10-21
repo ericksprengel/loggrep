@@ -90,6 +90,21 @@ describe('CLI', () => {
     expect(result.stdout).toContain('Skipped 42 frames!')
     expect(result.stdout).not.toContain('timed out')
   })
+  test('filters replayed entries whose tags contain spaces', async () => {
+    const module = join(directory, 'spaced-tag.ts')
+    const input = join(directory, 'spaced-tag.txt')
+    await Bun.write(module, 'export const handler = async () => ({filters: [{tag: /^My Tag$/}]})')
+    await Bun.write(input, [
+      '1729512000.123 100 101 D My Tag  : detail: selected message',
+      '1729512000.124 100 101 D Other   : unselected message',
+    ].join('\n'))
+    const result = await run(['-m', module, '-i', input])
+    expect(result.code).toBe(0)
+    expect(result.stderr).toBe('')
+    expect(result.stdout).toContain('My Tag')
+    expect(result.stdout).toContain('detail: selected message')
+    expect(result.stdout).not.toContain('unselected message')
+  })
   test('rejects bad arguments, config, modules and missing files', async () => {
     const bad = join(directory, 'bad.json')
     const array = join(directory, 'array.json')

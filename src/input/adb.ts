@@ -1,7 +1,7 @@
 import type {LogEntry, LogLevel} from '../types/log'
 import {readLines} from './lines'
 
-const LOG_LINE_EPOCH = /^\s*(\d+(?:\.\d+)?)\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(\S*)\s*: (.*)$/
+const LOG_LINE_EPOCH = /^\s*(\d+(?:\.\d+)?)\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.*?)\s*: (.*)$/
 
 export function parseLogEntry(line: string): LogEntry | undefined {
   const match = LOG_LINE_EPOCH.exec(line)
