@@ -1,12 +1,12 @@
 export async function loadPids(packages: string[]): Promise<string[]> {
   if (packages.length === 0) return []
-  const child = Bun.spawn(['adb', 'shell', 'ps'], {stdout: 'pipe', stderr: 'pipe'})
+  const child = Bun.spawn(['adb', 'shell', 'ps', '-A'], {stdout: 'pipe', stderr: 'pipe'})
   const [stdout, stderr, code] = await Promise.all([
     new Response(child.stdout).text(),
     new Response(child.stderr).text(),
     child.exited,
   ])
-  if (code !== 0) throw new Error(`adb shell ps exited with code ${code}: ${stderr.trim()}`)
+  if (code !== 0) throw new Error(`adb shell ps -A exited with code ${code}: ${stderr.trim()}`)
   const lines = stdout.trim().split(/\r?\n/)
   const headers = (lines.shift() ?? '').trim().split(/\s+/)
   const pidColumn = headers.indexOf('PID')

@@ -10,8 +10,12 @@ if (args[0] === 'shell') {
     process.exit(9)
   }
   console.log('USER PID PPID VSZ RSS WCHAN ADDR S NAME')
-  console.log('u0_a1 100 1 10 10 0 0 S com.example.app')
-  console.log('u0_a2 200 1 10 10 0 0 S com.example.other')
+  if (args.includes('-A')) {
+    console.log('u0_a1 100 1 10 10 0 0 S com.example.app')
+    console.log('u0_a2 200 1 10 10 0 0 S com.example.other')
+  } else {
+    console.log('shell 300 1 10 10 0 0 S ps')
+  }
 } else if (args.includes('-c')) {
   if (mode === 'resetfail') {
     console.error('reset denied')

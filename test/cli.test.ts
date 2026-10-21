@@ -162,13 +162,15 @@ describe('adb integration', () => {
     expect(result.stderr).toContain('filter failed')
     await waitForFile(adb.env.LOGGREP_TEST_STOPPED)
   })
-  test('pidcat resolves process IDs from adb output', async () => {
+  test('pidcat finds pre-existing app processes beyond the shell user', async () => {
     const adb = await fakeAdb()
     const config = join(directory, 'pidcat.json')
     await Bun.write(config, JSON.stringify({packages: ['com.example.app']}))
     const result = await run(['-m', '@pidcat', '-c', config], {env: adb.env})
     expect(result.code).toBe(0)
     expect(result.stdout).toContain('live failure')
+    const calls = (await Bun.file(adb.env.LOGGREP_TEST_CALLS).text()).trim().split('\n').map(line => JSON.parse(line))
+    expect(calls[0]).toEqual(['shell', 'ps', '-A'])
     const failure = await fakeAdb('psfail')
     expect((await run(['-m', '@pidcat', '-c', config], {env: failure.env})).stderr).toContain('device offline')
     expect(await loadPids([])).toEqual([])
