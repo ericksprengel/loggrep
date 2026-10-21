@@ -1,323 +1,108 @@
-loggrep
-=======
+# loggrep
 
-Loggrep is a awesome tool to analyze/view logcat (Android logs with custom filters and views
+Compose TypeScript and JavaScript modules to inspect Android logcat streams or replay saved logs. Modules can match tags, messages, levels and process IDs, or keep state across events to recognize a scenario.
 
-It's totally inspired on [pidcat from Jake Wharton](https://github.com/JakeWharton/pidcat)
+Inspired by [pidcat](https://github.com/JakeWharton/pidcat).
 
+## Requirements and setup
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
-[![Version](https://img.shields.io/npm/v/loggrep.svg)](https://npmjs.org/package/loggrep)
-[![Downloads/week](https://img.shields.io/npm/dw/loggrep.svg)](https://npmjs.org/package/loggrep)
-[![License](https://img.shields.io/npm/l/loggrep.svg)](https://github.com/ericksprengel/loggrep/blob/master/package.json)
+Use **Bun 1.4.3**, pinned in `.tool-versions` (for example, `asdf install`). Live input also requires Android platform tools (`adb`) and a connected device/emulator.
 
-# Getting Started
-
-Show all logcat log entries
-```shell
-npx loggrep logcat -f=@all
+```sh
+bun install --frozen-lockfile
+bun run dev -- --help
+bun run dev -- -m @all
 ```
 
-Available filters:
- - [@all](https://github.com/ericksprengel/loggrep/blob/master/src/filters/all.ts)
- - [@none](https://github.com/ericksprengel/loggrep/blob/master/src/filters/none.ts)
- - [@pidcat](https://github.com/ericksprengel/loggrep/blob/master/src/filters/pidcat.ts)
- - [@banana](https://github.com/ericksprengel/loggrep/blob/master/src/filters/banana.ts)
+To register the `loggrep` command globally from this checkout (the Bun global bin directory must be on PATH):
 
-
-### My custom filter
-
-```shell
-npx loggrep logcat -f=./banana.js
+```sh
+bun link
 ```
 
-`./banana.js` :
-```javascript
-const handler = async () => {
-  const filters = [
-    // filter "ActivityManager" tag
-    {tag: /^ActivityManager$/},
-  ]
+The package registers a `loggrep` executable with a Bun shebang. No compilation or Node.js runtime is required. Bun must remain available on PATH.
 
+## CLI
+
+```sh
+loggrep -m performance_issues.ts
+loggrep -m ./performance_issues.ts -m ./app_start.js
+loggrep -m ./scenario.ts -i recorded.txt
+loggrep -m @pidcat -c config.json
+```
+
+| Option | Behavior |
+| --- | --- |
+| `-m`, `--module <path>` | Repeat to combine modules; defaults to `@all` when omitted. |
+| `-i`, `--input <path>` | Read a saved logcat recording instead of live adb. |
+| `-c`, `--config <path>` | Pass a JSON object to every handler; defaults to `{}`. |
+| `-R`, `--reset` | Clear live device logs before reading; incompatible with `--input`. |
+| `-h`, `--help` | Show usage. |
+| `-v`, `--version` | Show package version. |
+
+Module, input and config paths resolve from the caller's working directory. Modules may also use absolute paths. Internal modules are `@all`, `@none`, `@banana`, `@pidcat` and `@time_error`.
+
+Configuration for pidcat, for example:
+
+```json
+{"packages": ["com.example.app"]}
+```
+
+`@pidcat` queries current device PIDs through adb. Its existing lifecycle markers are `ADD_APP_START` and `ADD_APP_END`; it is not a general Android process-lifecycle tracker. Modules that query adb still require a device when used with a recording. Use predicates on recorded entries for offline-only analysis.
+
+## Write a module
+
+```ts
+import type {LoggrepHandler} from 'loggrep'
+
+export const handler: LoggrepHandler = async config => {
+  let checkoutActive = false
   return {
-    filters,
-  }
-}
-
-exports.handler = handler
-```
-
-More examples like `./banana.js`:
-```javascript
-const handler = async () => {
-  const filters = [
-    // filter "Zygote" tag
-    {tag: /^Zygote$/},
-
-    // filter "Error" level
-    {level: /^E$/},
-
-    // filter process with pid "1234"
-    {pid: /^1234$/},
-
-    // filter log entries with tag "ActivityManager" and messages starting with "Received BROADCAST intent"
-    {
-      tag: /^ActivityManager$/,
-      message: /^Received BROADCAST intent/
+    hooks: {
+      onNewLine: ({tag, message}) => {
+        if (tag !== 'Scenario') return
+        if (message === 'BEGIN checkout') checkoutActive = true
+        if (message === 'END checkout') checkoutActive = false
+      },
     },
-
-    // custom function
-    // return true to show a log entry
-    ({
-      tag, line, level, tag, pid, message
-    }) => tag.endsWith('Manager'),
-  ]
-
-  return {
-    filters,
+    filters: [
+      entry => checkoutActive && entry.level === 'E',
+      {tag: /^Choreographer$/, message: /Skipped/},
+    ],
   }
 }
-
-exports.handler = handler
 ```
 
-# Why loggrep?
+JavaScript modules use the same named `handler` export without the type annotations. Handler factories are asynchronous; predicates and hooks are synchronous. Keep per-run state inside the factory.
 
-Filter adb logcat output is a painful task.
-If you'd like to filter by tag, message, log level or pid; you probably already used a combination of grep commands.
-But if you are debugging Android OS (framework, applications, radio etc.) in debug mode, you know that it's impossible to handle it.
+Fields within a regex object combine with **AND**. Filters within a module and modules within a run combine with **OR**. An empty filter array or omitted `filters` matches nothing; `{}` matches everything. Global/sticky regexes are reset for each match. Predicates receive the complete parsed entry, including timestamp and thread ID.
 
-`loggrep` is a tool with powerful and customizable filters/formatters that will help you.
+For each parsed entry, all `onNewLine` hooks run in module order **before** matching. If any filter matches, all modules' `onLineMatch` hooks run, then the entry is printed once. These are global-match hooks, not module-local hooks. A hook-only module can observe every entry without making it visible.
 
+The public exports currently provide types from `loggrep`, the existing default formatter from `loggrep/format`, and the pidcat handler from `loggrep/filters/pidcat`. A programmatic processing API will be designed in the subsequent architecture review. See the sibling `loggrep-client` repository for runnable modules.
 
-P.S.: if you're trying to filter only your application log, you just need [Jake Wharton's pidcat](https://github.com/JakeWharton/pidcat)
+## Record and replay
 
-
-
-<!-- toc -->
-* [Getting Started](#getting-started)
-* [Why loggrep?](#why-loggrep)
-* [Usage](#usage)
-* [Commands](#commands)
-<!-- tocstop -->
-# Usage
-<!-- usage -->
-```sh-session
-$ npm install -g loggrep
-$ loggrep COMMAND
-running command...
-$ loggrep (--version)
-loggrep/2.1.0 darwin-x64 node-v16.13.1
-$ loggrep --help [COMMAND]
-USAGE
-  $ loggrep COMMAND
-...
-```
-<!-- usagestop -->
-# Commands
-<!-- commands -->
-* [`loggrep help [COMMAND]`](#loggrep-help-command)
-* [`loggrep logcat`](#loggrep-logcat)
-* [`loggrep plugins`](#loggrep-plugins)
-* [`loggrep plugins:inspect PLUGIN...`](#loggrep-pluginsinspect-plugin)
-* [`loggrep plugins:install PLUGIN...`](#loggrep-pluginsinstall-plugin)
-* [`loggrep plugins:link PLUGIN`](#loggrep-pluginslink-plugin)
-* [`loggrep plugins:uninstall PLUGIN...`](#loggrep-pluginsuninstall-plugin)
-* [`loggrep plugins update`](#loggrep-plugins-update)
-
-## `loggrep help [COMMAND]`
-
-Display help for loggrep.
-
-```
-USAGE
-  $ loggrep help [COMMAND] [-n]
-
-ARGUMENTS
-  COMMAND  Command to show help for.
-
-FLAGS
-  -n, --nested-commands  Include all nested commands in the output.
-
-DESCRIPTION
-  Display help for loggrep.
+```sh
+adb logcat -v threadtime -v epoch > recorded.txt
+loggrep -m ./scenario.ts -i recorded.txt
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.9/src/commands/help.ts)_
+Input uses epoch/threadtime logcat format:
 
-## `loggrep logcat`
-
-describe the command here
-
-```
-USAGE
-  $ loggrep logcat [-h] [-f <value>] [-c <value>] [-i <value>] [-R]
-
-FLAGS
-  -R, --shouldReset         reset adb log
-  -c, --config=<value>      config file
-  -f, --filters=<value>...  [default: @all] filters
-  -h, --help                Show CLI help.
-  -i, --input=<value>       input path
-
-DESCRIPTION
-  describe the command here
-
-EXAMPLES
-  $ loggrep logcat --f=@all
-
-  $ loggrep logcat --f=./myfilter
-
-  $ loggrep logcat -i=../logs/mylog.txt
-
-  $ loggrep logcat -R
+```text
+1729512000.400 100 101 E Network: checkout timed out
 ```
 
-_See code: [dist/commands/logcat/index.ts](https://github.com/ericksprengel/loggrep/blob/v2.1.0/dist/commands/logcat/index.ts)_
+Banners and unrecognized lines are skipped. Files are streamed in recorded order, without replay timing delays or loading the entire file into memory. Module hooks can produce their own reports; CLI and adb diagnostics go to stderr. EOF closes normally, failures return exit code 1, and SIGINT/SIGTERM stop the child adb process.
 
-## `loggrep plugins`
+## Development
 
-List installed plugins.
-
-```
-USAGE
-  $ loggrep plugins [--core]
-
-FLAGS
-  --core  Show core plugins.
-
-DESCRIPTION
-  List installed plugins.
-
-EXAMPLES
-  $ loggrep plugins
+```sh
+bun check
+bun test
 ```
 
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.0.11/src/commands/plugins/index.ts)_
+Tests cover module loading, composition, streaming, replay and subprocess cleanup using a fake adb. No device is needed for automated tests. CI uses Bun 1.4.3 and frozen lockfiles. Lint/format tooling is deferred; follow `.editorconfig` and the surrounding code style.
 
-## `loggrep plugins:inspect PLUGIN...`
-
-Displays installation properties of a plugin.
-
-```
-USAGE
-  $ loggrep plugins:inspect PLUGIN...
-
-ARGUMENTS
-  PLUGIN  [default: .] Plugin to inspect.
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Displays installation properties of a plugin.
-
-EXAMPLES
-  $ loggrep plugins:inspect myplugin
-```
-
-## `loggrep plugins:install PLUGIN...`
-
-Installs a plugin into the CLI.
-
-```
-USAGE
-  $ loggrep plugins:install PLUGIN...
-
-ARGUMENTS
-  PLUGIN  Plugin to install.
-
-FLAGS
-  -f, --force    Run yarn install with force flag.
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Installs a plugin into the CLI.
-
-  Can be installed from npm or a git url.
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  e.g. If you have a core plugin that has a 'hello' command, installing a user-installed plugin with a 'hello' command
-  will override the core plugin implementation. This is useful if a user needs to update core plugin functionality in
-  the CLI without the need to patch and update the whole CLI.
-
-ALIASES
-  $ loggrep plugins add
-
-EXAMPLES
-  $ loggrep plugins:install myplugin 
-
-  $ loggrep plugins:install https://github.com/someuser/someplugin
-
-  $ loggrep plugins:install someuser/someplugin
-```
-
-## `loggrep plugins:link PLUGIN`
-
-Links a plugin into the CLI for development.
-
-```
-USAGE
-  $ loggrep plugins:link PLUGIN
-
-ARGUMENTS
-  PATH  [default: .] path to plugin
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Links a plugin into the CLI for development.
-
-  Installation of a linked plugin will override a user-installed or core plugin.
-
-  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
-  command will override the user-installed or core plugin implementation. This is useful for development work.
-
-EXAMPLES
-  $ loggrep plugins:link myplugin
-```
-
-## `loggrep plugins:uninstall PLUGIN...`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ loggrep plugins:uninstall PLUGIN...
-
-ARGUMENTS
-  PLUGIN  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ loggrep plugins unlink
-  $ loggrep plugins remove
-```
-
-## `loggrep plugins update`
-
-Update installed plugins.
-
-```
-USAGE
-  $ loggrep plugins update [-h] [-v]
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Update installed plugins.
-```
-<!-- commandsstop -->
+Version 3 replaces the oclif CLI: there is no `logcat` subcommand, `-f` is replaced by `-m`, and imports from `loggrep/dist/...` are removed. Installation, execution and tests use Bun; there is no build step. This migration preserves the existing filter model. A separate architecture review will address the library API, state, composition and lifecycle.

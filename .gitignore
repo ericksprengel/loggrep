@@ -1,8 +1,8 @@
-*-debug.log
-*-error.log
-/.nyc_output
-/dist
-/lib
-/package-lock.json
-/tmp
-node_modules
+node_modules/
+dist/
+lib/
+coverage/
+*.tsbuildinfo
+*.tgz
+.env
+.env.*

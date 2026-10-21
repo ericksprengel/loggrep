@@ -1,30 +1,58 @@
-/* eslint-disable unicorn/filename-case */
-import log from '../utils/log'
-import {LoggrepConfig, LoggrepHandler, LoggrepHandlerInstance} from '../types/log'
+import {resolve} from 'node:path'
+import {pathToFileURL} from 'node:url'
+import type {FilterRegExp, LoggrepConfig, LoggrepHandlerInstance} from '../types/log'
+
+const builtins = new Set(['all', 'none', 'pidcat', 'banana', 'time_error'])
+const fields: (keyof FilterRegExp)[] = ['line', 'level', 'tag', 'pid', 'message']
 
 const loadFilters = async (
   config: LoggrepConfig,
-  filterPaths: string[],
+  paths: string[],
 ): Promise<LoggrepHandlerInstance[]> => {
-  try {
-    // load modules
-    const handlers = await Promise.all(filterPaths.map(async (filterPath: string): Promise<LoggrepHandler> => {
-      if (filterPath.startsWith('@')) {
-        // load embedded filters (eg: @all, @none, @pidcat)
-        return (await import(`../filters/${filterPath.substr(1)}`)).handler
+  return Promise.all(paths.map(async path => {
+    try {
+      if (path.startsWith('@') && !builtins.has(path.slice(1))) {
+        throw new Error('unknown built-in module')
       }
-      // load custom filters (eg: ./myapp.ts, ./myerros.ts)
-      return (await import(`${process.cwd()}/${filterPath}`)).handler
-    }))
+      const url = path.startsWith('@')
+        ? new URL(`../filters/${path.slice(1)}.ts`, import.meta.url).href
+        : pathToFileURL(resolve(path)).href
+      const module = await import(url)
+      if (typeof module.handler !== 'function') {
+        throw new Error('expected an exported handler function')
+      }
+      const instance: unknown = await module.handler(config)
+      validate(instance)
+      return instance
+    } catch (cause) {
+      const reason = cause instanceof Error ? cause.message : String(cause)
+      throw new Error(`Cannot load module "${path}": ${reason}`)
+    }
+  }))
+}
 
-    // load filter instances
-    return Promise.all(handlers.map(handler => handler(config)))
-  } catch (error) {
-    log.e('Failed to load filters')
-    throw error
-    // if (error instanceof SyntaxError) {
-    //   log.e('linha:', error.lineNumber)
-    // }
+function validate(instance: unknown): asserts instance is LoggrepHandlerInstance {
+  if (!instance || typeof instance !== 'object' || Array.isArray(instance)) {
+    throw new Error('handler must return an object')
+  }
+  const {filters, hooks} = instance as LoggrepHandlerInstance
+  if (filters !== undefined && (!Array.isArray(filters) || !filters.every(filter =>
+    typeof filter === 'function' || (
+      filter !== null && typeof filter === 'object' && !Array.isArray(filter) &&
+      Object.keys(filter).every(key => fields.includes(key as keyof FilterRegExp)) &&
+      fields.every(field => filter[field] === undefined || filter[field] instanceof RegExp)
+    )
+  ))) {
+    throw new Error('filters must be an array of predicates or regular-expression objects')
+  }
+  if (hooks !== undefined && (
+    !hooks || typeof hooks !== 'object' || Array.isArray(hooks) ||
+    ['onNewLine', 'onLineMatch'].some(key => {
+      const hook = hooks[key as keyof typeof hooks]
+      return hook !== undefined && typeof hook !== 'function'
+    })
+  )) {
+    throw new Error('hooks must contain onNewLine/onLineMatch functions')
   }
 }
 

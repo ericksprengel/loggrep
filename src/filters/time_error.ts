@@ -1,25 +1,16 @@
-import { LogEntry, LoggrepHandler } from '../types/log'
+import type {LoggrepHandler} from '../types/log'
 
 export const handler: LoggrepHandler = async () => {
-    const filters = [
-        (logEntry: LogEntry) => {
-            return logEntry.level == "E"
-        },
-    ]
-
-    var lastTime = new Date().getTime();
-
-    const onLineMatch = (logEntry: LogEntry) => {
-        console.log(logEntry.epoch!.getTime() - lastTime);
-        lastTime = logEntry.epoch!.getTime();
-    }
-
-    const hooks = {
-        onLineMatch,
-    }
-
-    return {
-        filters,
-        hooks
-    }
+  let lastTime: number | undefined
+  return {
+    filters: [entry => entry.level === 'E'],
+    hooks: {
+      onLineMatch: entry => {
+        if (!entry.epoch || entry.level !== 'E') return
+        const time = entry.epoch.getTime()
+        if (lastTime !== undefined) console.log(time - lastTime)
+        lastTime = time
+      },
+    },
+  }
 }

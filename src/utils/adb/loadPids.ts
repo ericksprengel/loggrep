@@ -1,34 +1,19 @@
-/* eslint-disable unicorn/filename-case */
-import {exec} from 'child_process'
-import * as util from 'util'
-import log from '../log'
-
-const execP = util.promisify(exec)
-// USER           PID  PPID     VSZ    RSS WCHAN            ADDR S NAME
-// u0_a85        9195  1759 1885328 361580 0                   0 S br.com.stone.mais.development
-// u0_a296   25404 288   1456592 204380 ffffffff 00000000 S br.com.stone.mais.development
-const PS_LINE  = /^(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\S+)\s+(.*)$/
-
-// input
-const loadPids = async (packages: string[]) => {
-  // eslint-disable-next-line spaced-comment
-  const {/*error,*/stdout} = await execP('adb shell ps')
-  // if (error) {
-  //   log.e(`exec error: ${error}`)
-  //   process.exit(1)
-  // }
-  const pids = []
-  for (const line of stdout.split(/\r?\n/)) {
-    const res = PS_LINE.exec(line) || []
-    const pid = res[2]
-    const name = res[9]
-    if (packages.includes(name)) {
-      pids.push(pid)
-    }
-  }
-  return pids
-}
-
-export {
-  loadPids,
+export async function loadPids(packages: string[]): Promise<string[]> {
+  if (packages.length === 0) return []
+  const child = Bun.spawn(['adb', 'shell', 'ps'], {stdout: 'pipe', stderr: 'pipe'})
+  const [stdout, stderr, code] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ])
+  if (code !== 0) throw new Error(`adb shell ps exited with code ${code}: ${stderr.trim()}`)
+  const lines = stdout.trim().split(/\r?\n/)
+  const headers = (lines.shift() ?? '').trim().split(/\s+/)
+  const pidColumn = headers.indexOf('PID')
+  const nameColumn = headers.indexOf('NAME') === -1 ? headers.indexOf('CMD') : headers.indexOf('NAME')
+  if (pidColumn === -1 || nameColumn === -1) throw new Error('Unrecognized adb shell ps header')
+  return lines.flatMap(line => {
+    const columns = line.trim().split(/\s+/)
+    return packages.includes(columns[nameColumn]) ? [columns[pidColumn]] : []
+  })
 }

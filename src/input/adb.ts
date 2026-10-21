@@ -1,76 +1,68 @@
-import {spawn, spawnSync} from 'child_process'
-import {createInterface} from 'readline'
-import log from '../utils/log'
-import {LogEntry, LogLevel} from '../types/log'
-import {createReadStream} from 'fs'
-import * as dayjs from 'dayjs'
+import type {LogEntry, LogLevel} from '../types/log'
+import {readLines} from './lines'
 
-// I/TAG   ( 1234): message: fruit=banana?
-//const LOG_LINE_BRIEF = /^([A-Z])\/\s*(\S*)\s*\( *(\d+)\): (.*)$/
+const LOG_LINE_EPOCH = /^\s*(\d+(?:\.\d+)?)\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(\S*)\s*: (.*)$/
 
-// 12-23 16:04:20.225  1207  1876 D SemContextService: lock : registerCallback
-//const LOG_LINE_THREADTIME = /^\s*(\d+)\s+(\d\d:\d\d:\d\d.\d\d\d)\s+(\d+)\s+(\d+)\s+([A-Z])\s*(\S*)\s*: (.*)$/
-
-// 1640647366.608	1207  1876 D SemContextService: lock : registerCallback
-const LOG_LINE_EPOCH =  /^\s*([\d.]+)\s+(\d+)\s+(\d+)\s+([A-Z])\s*(\S*)\s*: (.*)$/
-
-// input
-const start = (callback: (logEntry: LogEntry) => void, input: string|undefined, shouldReset: boolean): void => {
-  var adb = null;
-  var stream: NodeJS.ReadableStream;
-
-  if (input) {
-    stream = createReadStream(input)
-  } else {
-    if(shouldReset){
-      spawnSync("adb", ["logcat", "-c"])
-    }
-    adb = spawn("adb", ["logcat", "-v", "threadtime", "-v", "epoch"]);
-    stream = adb.stdout
-  }
-
-  const rl = createInterface({
-    input: stream,
-  })
-
-  rl.on('line', (line: string) => {
-    const res = LOG_LINE_EPOCH.exec(line)
-    if (!res) {
-      // console.log('IGNORING: ', line)
-      return
-    }
-
-    // EPOCH
-    const [fullMatch, epoch, pid, tid, level, tag, message] = res
-
-    if (line !== fullMatch) {
-      // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-      process.exit(1)
-    }
-
-    const date = dayjs.unix(parseFloat(epoch)).toDate()
-
-    callback({
-      line,
-      level: level as LogLevel,
-      epoch: date,
-      tid,
-      tag,
-      pid,
-      message,
-    })
-  })
-
-  if (adb) {
-    adb.stderr.on("data", (data: any): void => {
-      log.e(`ERROR: ${data}`);
-    });
-
-    adb.on("close", (code: number) => {
-      log.e(`child process exited with code ${code}`);
-    });
-  }
-
+export function parseLogEntry(line: string): LogEntry | undefined {
+  const match = LOG_LINE_EPOCH.exec(line)
+  if (!match) return
+  const [, epoch, pid, tid, level, tag, message] = match
+  const date = new Date(Number(epoch) * 1000)
+  if (!Number.isFinite(date.getTime())) return
+  return {line, epoch: date, pid, tid, level: level as LogLevel, tag, message}
 }
 
-export { start }
+export async function start(
+  callback: (entry: LogEntry) => void,
+  input: string | undefined,
+  shouldReset: boolean,
+  signal?: AbortSignal,
+): Promise<void> {
+  if (signal?.aborted) return
+  if (input !== undefined) {
+    for await (const line of readLines(Bun.file(input).stream(), signal)) {
+      const entry = parseLogEntry(line)
+      if (entry) callback(entry)
+    }
+    return
+  }
+
+  if (shouldReset) {
+    const reset = Bun.spawn(['adb', 'logcat', '-c'], {stdout: 'ignore', stderr: 'pipe'})
+    const abortReset = () => { reset.kill() }
+    signal?.addEventListener('abort', abortReset, {once: true})
+    try {
+      const [code, stderr] = await Promise.all([reset.exited, new Response(reset.stderr).text()])
+      if (signal?.aborted) return
+      if (code !== 0) throw new Error(`adb logcat reset exited with code ${code}: ${stderr.trim()}`)
+    } finally {
+      signal?.removeEventListener('abort', abortReset)
+    }
+  }
+  if (signal?.aborted) return
+  const adb = Bun.spawn(['adb', 'logcat', '-v', 'threadtime', '-v', 'epoch'], {
+    stdout: 'pipe', stderr: 'pipe',
+  })
+  const abort = () => { adb.kill() }
+  signal?.addEventListener('abort', abort, {once: true})
+  // Drain stderr concurrently so a noisy adb cannot block stdout.
+  const diagnostics = (async () => {
+    for await (const line of readLines(adb.stderr)) console.error(`adb: ${line}`)
+  })()
+  // Attach a rejection handler immediately; propagate it after stream cleanup.
+  void diagnostics.catch(() => { adb.kill() })
+  try {
+    for await (const line of readLines(adb.stdout, signal)) {
+      const entry = parseLogEntry(line)
+      if (entry) callback(entry)
+    }
+    const code = await adb.exited
+    await diagnostics
+    if (!signal?.aborted && code !== 0) throw new Error(`adb logcat exited with code ${code}`)
+  } finally {
+    signal?.removeEventListener('abort', abort)
+    adb.kill()
+    await adb.exited
+    await diagnostics
+  }
+}
