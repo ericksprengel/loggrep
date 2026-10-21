@@ -2,31 +2,23 @@ import loadFilters from './loadFilters'
 import logEntry from './logEntry'
 import shouldShowLogEntry from './shouldShowLogEntry'
 import {start} from '../input/adb'
-import {LogEntry} from '../types/log'
+import type {LogEntry, LoggrepConfig} from '../types/log'
 
-const main = async (filters: string[], config: object, input: string|undefined, shouldReset: boolean) => {
-  // 1. Load filter modules
-  const FILTER_MODULES = await loadFilters(config, filters)
-
-  // 2. Start input reader listener
-  start((entry: LogEntry): void => {
-    // 2.1 Process onNewLine hooks
-    for (const loggrepHandlerInstance of FILTER_MODULES) {
-      loggrepHandlerInstance.hooks?.onNewLine?.(entry)
-    }
-
-    // 2.2 Ignore line if no one would show it
-    if (!shouldShowLogEntry(FILTER_MODULES, entry)) {
-      return
-    } else {
-      for (const loggrepHandlerInstance of FILTER_MODULES) {
-        loggrepHandlerInstance.hooks?.onLineMatch?.(entry)
-      }
-    }
-
-    // 2.2 LOG IT!
+const main = async (
+  filters: string[],
+  config: LoggrepConfig,
+  input: string | undefined,
+  shouldReset: boolean,
+  signal?: AbortSignal,
+): Promise<void> => {
+  const modules = await loadFilters(config, filters)
+  if (signal?.aborted) return
+  await start((entry: LogEntry) => {
+    for (const module of modules) module.hooks?.onNewLine?.(entry)
+    if (!shouldShowLogEntry(modules, entry)) return
+    for (const module of modules) module.hooks?.onLineMatch?.(entry)
     logEntry(entry)
-  }, input, shouldReset)
+  }, input, shouldReset, signal)
 }
 
 export default main

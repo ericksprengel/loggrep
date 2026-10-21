@@ -1,0 +1,8 @@
+--------- beginning of main
+1729512000.000 100 101 E Network: outside-before
+1729512000.100 100 101 I Scenario: BEGIN checkout
+1729512000.200 100 101 I App: normal event
+1729512000.300 100 101 I Choreographer: Skipped 42 frames!
+1729512000.400 100 101 E Network: checkout timed out
+1729512000.500 100 101 I Scenario: END checkout
+1729512000.600 100 101 E Network: outside-after

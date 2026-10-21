@@ -1,9 +1,8 @@
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import log from '../utils/log'
-import {LogEntry} from '../types/log'
+import type {LogEntry} from '../types/log'
 
 const COLORS = [
-  // 'black',
   'red',
   'green',
   'yellow',
@@ -24,7 +23,7 @@ const LEVEL_COLOR = {
 
 const HEADER_WIDTH = 25 + 1 + 3 + 1
 const HEADER_EMPTY = ' '.repeat(HEADER_WIDTH)
-const MESSAGE_LINE_WIDTH = (process.stdout.columns ?? 200) - HEADER_WIDTH
+const MESSAGE_LINE_WIDTH = Math.max(1, (process.stdout.columns ?? 200) - HEADER_WIDTH)
 const MESSAGE_LINE_SPLITER = new RegExp(`.{1,${MESSAGE_LINE_WIDTH}}`, 'g')
 
 let LAST_TAG: string
@@ -46,7 +45,6 @@ const logEntry = ({level, tag, message}: LogEntry) => {
     ' '.repeat(25) :
     tag.substring(0, 25).padStart(25, ' ')
 
-  // before upgrade chalk to 5.0: https://github.com/microsoft/TypeScript/issues/46930
   const tagWithLevel = chalk`{${TAG_COLORS[tag]} ${tagWithPad} }{${LEVEL_COLOR[level]}  ${level} }`
 
   if (message) {

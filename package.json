@@ -1,78 +1,46 @@
 {
   "name": "loggrep",
-  "description": "Loggrep is a awesome tool to analyze/view logcat (Android logs with custom filters and views",
-  "version": "2.1.0",
+  "description": "Compose TypeScript and JavaScript modules to filter Android logcat streams and recordings.",
+  "version": "3.0.0",
   "author": "Erick Massa Sprengel",
   "bin": {
-    "loggrep": "./bin/run"
+    "loggrep": "./src/cli.ts"
   },
   "bugs": "https://github.com/ericksprengel/loggrep/issues",
   "dependencies": {
-    "@oclif/core": "^1",
-    "@oclif/plugin-help": "^5",
-    "@oclif/plugin-plugins": "^2.0.1",
-    "chalk": "^4.1.2",
-    "dayjs": "^1.10.7"
+    "chalk": "^4.1.2"
   },
   "devDependencies": {
-    "@oclif/test": "^2",
-    "@types/chai": "^4",
-    "@types/mocha": "^9.0.0",
-    "@types/node": "^16.9.4",
-    "chai": "^4",
-    "eslint": "^7.32.0",
-    "eslint-config-oclif": "^4",
-    "eslint-config-oclif-typescript": "^1.0.2",
-    "globby": "^11",
-    "mocha": "^9",
-    "oclif": "^2.0.0-main.10",
-    "shx": "^0.3.3",
-    "ts-node": "^10.2.1",
-    "tslib": "^2.3.1",
-    "typescript": "^4.4.3"
+    "@types/bun": "1.4.3"
   },
-  "dirname": "oex",
   "engines": {
-    "node": ">=12.0.0"
+    "bun": ">=1.4.3"
   },
   "files": [
-    "/bin",
-    "/dist",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "src",
+    "README.md",
+    "LICENSE"
   ],
   "homepage": "https://github.com/ericksprengel/loggrep",
   "keywords": [
     "logcat",
     "android",
-    "oclif"
+    "bun",
+    "typescript",
+    "filters"
   ],
   "license": "MIT",
-  "main": "dist/index.js",
-  "oclif": {
-    "bin": "loggrep",
-    "commands": "./dist/commands",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-plugins"
-    ],
-    "topicSeparator": " ",
-    "topics": {
-      "logcat": {
-        "description": "android logcat"
-      }
-    }
-  },
   "repository": "ericksprengel/loggrep",
   "scripts": {
-    "build": "shx rm -rf dist && tsc -b",
-    "lint": "eslint . --ext .ts --config .eslintrc",
-    "postpack": "shx rm -f oclif.manifest.json",
-    "posttest": "yarn lint",
-    "prepack": "yarn build && oclif manifest && oclif readme",
-    "run": "./bin/dev",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
-    "version": "oclif readme && git add README.md"
+    "dev": "bun src/cli.ts",
+    "typecheck": "bun check",
+    "test": "bun test"
   },
-  "types": "dist/index.d.ts"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./format": "./src/core/logEntry.ts",
+    "./filters/pidcat": "./src/filters/pidcat.ts"
+  },
+  "packageManager": "bun@1.4.3"
 }
